@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-9">
+      
+      <h1>Curd Shop Inventory</h1>
+
+      <p class="text-center">
+        <img src="http://i.giphy.com/pQVai9s9AnKdW.gif" alt="night cheese" title="Working on my night cheese">
+      </p>
+
+      <p>Welcome to the <strong>Curd Shop</strong> inventory system! Thanks for working all night to receive the new shipments of artisanal cheese!</p>
+
+      <p>This demo application will show you how <a href="https://docs.djangoproject.com/en/1.8/topics/class-based-views/">Django's class-based views</a> are great ... and sometimes not.</p>
+
+      <p><a class="btn btn-primary btn-xs" href="{% url 'new_cheese' %}">Add a cheese to the inventory</a> to see how it works!</p>
+
+    </div>
+
+  </div><!--/row-->
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Cheeses{% endblock title %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-9">
+
+      <div class="page-header">
+        <h1>Cheeses</h1>
+      </div>
+
+      {% if not object_list %}
+        <p><strong>No cheeses in stock.</strong> Maybe you want to <a href="{% url 'new_cheese' %}">add a new one?</a></p>
+      {% endif %}
+
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cheese in object_list %}
+            <tr>
+              <td><a href="{{ cheese.get_absolute_url }}">{{ cheese.pk }}</a></td>
+              <td>{{ cheese.name }}</td>
+              <td>{{ cheese.name }}</td>
+              <td>${{ cheese.price }}</td>
+              <td>
+                <a class="btn btn-default btn-xs" href="{% url 'edit_cheese' cheese.pk %}">Edit</a>
+                <a class="btn btn-xs btn-danger" href="{% url 'delete_cheese' cheese.pk %}">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <a class="btn btn-primary" href="{% url 'new_cheese' %}">New</a>
+    </div>
+  </div>
+{% endblock %}

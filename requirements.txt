@@ -1,0 +1,14 @@
+# Requirements for Curd Shop tutorial project
+
+# Django 1.8 is a LTS release
+Django==1.8
+
+# Third-party app dependencies
+django-bootstrap3==6.1.0
+django-crispy-forms==1.4.0
+django-forms-bootstrap==3.0.1
+psycopg2==2.6.1
+whitenoise==2.0.2
+
+# Production dependencies
+gunicorn==19.3.0

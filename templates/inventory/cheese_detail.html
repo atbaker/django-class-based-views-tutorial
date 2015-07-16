@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cheese }}{% endblock title %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-9">
+      <div class="page-header">
+        <h1>Cheese</h1>
+      </div>
+
+      <dl class="dl-horizontal">
+        <dt><strong>Name:</strong></dt>
+        <dd>{{ cheese.name }}</dd>
+        <dt><strong>Price:</strong></dt>
+        <dd>${{ cheese.price }}</dd>
+        <dt><strong>Quantity:</strong></dt>
+        <dd>{{ cheese.quantity }}</dd>
+      </dl>
+
+      <a class="btn btn-default" href="{% url 'list_cheeses' %}">Back</a>
+      <a class="btn btn-default" href="{% url 'edit_cheese' cheese.id %}">Edit</a>
+      <a class="btn btn-danger" data-method="delete" href="{% url 'delete_cheese' cheese.id %}">Delete</a>
+    </div>
+  </div>
+{% endblock %}
