@@ -4,6 +4,7 @@ from django.views.generic import TemplateView
 
 urlpatterns = [
     url(r'^$', TemplateView.as_view(template_name='index.html'), name='home'),
+    # url(r'^$', 'inventory.views.home'),
     url(r'^inventory', include('inventory.urls')),    
 
     # Include the Django admin

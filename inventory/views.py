@@ -1,10 +1,20 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.urlresolvers import reverse_lazy
+from django.shortcuts import render_to_response
 from django.views.generic import DetailView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic.list import ListView
 
 from .models import Cheese
+
+def home(request):
+    """A sample function-based view"""
+    context = {}
+
+    # Do some view logic - for example:
+    context['foo'] = 'bar'
+
+    return render_to_response('index.html', context)
 
 class CheeseListView(ListView):
     """Shows users a list of cheeses"""
