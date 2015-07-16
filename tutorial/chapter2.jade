@@ -1,0 +1,81 @@
+.step(data-title='Every act of creation is first an act of destruction', data-file='inventory/views.py', data-highlight='29-34')
+  blockquote 
+  | Every act of creation is first an act of destruction.
+  
+  p(style="text-align: right") - Pablo Picasso
+  
+  :markdown
+    When we looked at ListView and DetailView, we got a taste for the drawbacks of using class-based views. They seemed like a lot of "magic" just to save a few lines of view code.
+
+    [CreateView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#createview) has even more magic, but it also saves you a lot of form processing boilerplate code that developers hate to write.
+
+    By specifying only the `model` and `fields` property of our `CheeseCreateView`, Django does a lot work for us. This view will:
+
+    1. Render a blank form on a GET request using the `cheese_form.html` template
+    1. Create a [ModelForm](https://docs.djangoproject.com/en/1.8/topics/forms/modelforms/#modelform) for our `Cheese` model to sanitize POST data
+    1. Return any errors on the form to the user
+    1. Save the new `Cheese` instance and redirect the user to the `Cheese` model's `get_absolute_url` method when it receives valid input
+
+    That's a lot of bang for our buck from just two properties - especially when you consider the tests we would have needed to cover a function-based view that does the same work.
+
+.step(data-title='Update! Update! This just in: mixins', data-file='inventory/views.py', data-highlight='29-42')
+  :markdown
+    ## Update! Update! This just in: mixins
+
+    Our `CheeseUpdateView` looks almost exactly like our `CheeseCreateView`, but it inherits from [UpdateView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#updateview).
+
+    A sort-of hybrid of DetailView and CreateView, UpdateView does all the work we mentioned in the previous step but will prepopulate its form data with values from an existing `Cheese` instance.
+
+    **Mixins**
+
+    We  gave both views a little extra kick by having them inherit from the [SuccessMessageMixin](https://docs.djangoproject.com/en/1.8/ref/contrib/messages/) class. 
+
+    This handy class will use the value of our view class's `success_message` property with Django's messaging framework, giving us a nice way confirm with users that the creation was successful.
+
+    Mixins make class-based views better by helping them do a little extra work. Though writing your own involves diving deeper into the class-based views API, the [django-braces](http://django-braces.readthedocs.org/en/latest/index.html) library offers some handy mixins that may do what you need already.
+
+    Here are just a few:
+
+    - [LoginRequiredMixin](http://django-braces.readthedocs.org/en/latest/access.html#loginrequiredmixin)
+    - [SuperuserRequiredMixin](http://django-braces.readthedocs.org/en/latest/access.html#superuserrequiredmixin)
+    - [SSLRequiredMixin](http://django-braces.readthedocs.org/en/latest/access.html#sslrequiredmixin)
+
+    We'll wrap up by looking at the most unique of Django's class-based views, DeleteView.
+
+.step(data-title='Del33t', data-file='inventory/views.py', data-highlight='45-49')
+  :markdown
+    ## Del33t
+
+    [DeleteView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#deleteview) mostly does what you would expect - it takes a primary key for an object and removes it from the database.
+
+    What you might not expect is that DeleteView also adds a confirmation step into the workflow. 
+
+    When a user GETs a DeleteView, you can provide a template with a form asking the user to confirm their decision. DeleteView only removes the identified object from the database when it receives a POST request.
+
+    One of DeleteView's quirks is its `success_url` property.
+
+    The other class-based views reference a model instance's `get_absolute_url` method to determine which URL to redirect users to after a successful operation. A successful DeleteView operation removes the object in question, so we need to manually specify a different URL to route users to.
+
+    Because our class-based view properties are evaluated when our `views.py` module is first loaded, Django will throw an error if we used the regular `reverse` shortcut because Django hasn't parsed our project's URL configuration yet.
+
+    The [reverse_lazy](https://docs.djangoproject.com/en/1.8/ref/urlresolvers/#reverse-lazy) utility is our ticket out of that problem.
+
+.step(data-title='You be the judge', data-file='inventory/views.py')
+  :markdown
+    ## You be the judge
+
+    One year ago Adrian Holovaty, one of Django's co-creators, [explicity discouraged using class-based views in a Reddit thread](http://www.reddit.com/r/django/comments/1kc3go/cbv_lifecycle_documentation/cbnkwig):
+
+  blockquote
+    | I'd suggest not using class-based views. They're way over-abstracted and not worth the cognitive burden.
+
+  :markdown
+    On the other hand [Two Scoops of Django](http://twoscoopspress.org/), which is generally recognized as the single best tome of Django best practices, strongly advocates for class-based views:
+
+  blockquote
+    | We prefer to use CBVs for most views, using FBVs to implement only the custom error views or complicated ones that would be a pain to implement with CBVs.
+
+  :markdown
+    In this tutorial we've examined some of the advantages and disadvantages of class-based views. Like most programming disagreements, the truth in this case is probably "use the right tool for the job."
+
+    And even if you never try using class-based views yourself, you're now well equipped to start an argument at your next Django meetup!

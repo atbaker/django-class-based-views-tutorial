@@ -1,0 +1,6 @@
+{
+    "title": "Django class-based views",
+    "description": "Learn about Django's unusual class-based views feature and when to use them - and not use them - in your own projects.",
+    "repo": "atbaker/django-class-based-views-tutorial",
+    "heroku": false
+}

@@ -1,0 +1,99 @@
+.step(data-title='Introduction', data-file='inventory/views.py')
+  :markdown
+    ## Django class-based views: threat or menace?
+
+    *Author's note: I maybe played around too much with some of these step titles. I would probably not be so cheeky for something on Twilio.com... probably.*
+
+    In March 2011, as part of a relatively standard minor release, the Django project officially incorporated its most controversial feature ever: [class-based views](https://docs.djangoproject.com/en/1.8/releases/1.3/#class-based-views).
+
+    Devised as a tool to help developers avoid writing boilerplate [Create, Read, Update, and Delete](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) view logic, class-based views came under fire as a violation of Python's second most important tenet:
+
+  pre
+    | import this
+    | 
+    | ...
+    | Explicit is better than implicit.
+
+  :markdown
+    While class-based views can greatly reduce the lines of code a developer needs to implement some basic web application features, critics of class-based views say that the cognitive overhead and "magic" of CBVs negate any benefits they provide.
+
+    To see this firsthand, let do a quick comparison of a function-based view and a class-based view.
+
+.step(data-title='A function-based view', data-file='inventory/views.py', data-highlight='10-17')
+  :markdown
+    ## A familiar function-based view
+
+    Django, like most web frameworks, expects the views you write as a developer to fulfill to a simple contract: they should accept a request and return a response.
+
+    What you do in between is up to you. Your views can be as simple or [or complex](http://stackoverflow.com/questions/12022105/pythonic-way-to-simplify-this-long-django-view) as you like.
+
+    To help us investigate class-based views, we'll look at a sample web application that helps workers track inventory at an artisanal cheese shop called "CURD".
+
+    This function-based view just renders our inventory system's home page template. It took us a few lines to write, but it's still a small view.
+
+    Now let's see what it takes to do this work with a class-based view instead.
+
+.step(data-title='Rendering a template in one line', data-file='curd/urls.py', data-highlight='1-6')
+  :markdown
+    ## Rendering a template in one line
+
+    Class-based views actually make straight template rendering pretty easy.
+
+    We can do it in one line in our URL configuration using Django's [TemplateView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/base/#django.views.generic.base.TemplateView).
+
+    Django invokes views as callables, so to use this view or any class-based view we need to give it to our URL using `.as_view()` method of the class.
+
+    Which is a little strange, but it saved us from writing a few lines of view code, which are precious lines we don't need to test.
+
+    Let's keep exploring class-based views and consider some more complex examples.
+
+.step(data-title='Read all about it', data-file='inventory/views.py', data-highlight='19-22')
+  :markdown
+    ## Read all about it
+
+    Any cheese shop worth its salt knows what cheese it stocks and how much it has of each. We wrote a small model to help our users track each cheese in the inventory:
+
+  pre
+    | class Cheese(models.Model):
+    |     """A type of cheese in the Curd Shop inventory"""
+    | 
+    |     name = models.CharField(max_length=50)
+    |     price = models.DecimalField(max_digits=5, decimal_places=2)
+    |     quantity = models.IntegerField(default=0)
+
+  :markdown
+    To show our users a list of all cheeses in the database, you can imagine what our function-based view would look like:
+
+    1. Query the ORM for `Cheese.objects.all()`
+    1. Set the result of that query as a variable in our context
+    1. Render a list template with that context
+
+    That would take a few lines of code, but Django's [ListView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#listview) can save us some time. We get all the functionality listed above just for setting a single property on the view.
+
+    You might be wondering how ListView knows which template to render? This is the first of many dynamic default class-based view properties we'll encounter.
+
+    By default, ListView looks for a template named `{{ model name }}_list.html` - in our case that's `cheese_list.html`. If that bugs you though, you can always add a `template_name` property to your `ListView` implementation.
+
+.step(data-title='Don\'t sweat the details', data-file='inventory/views.py', data-highlight='24-27')
+  :markdown
+    ## Don't sweat the details
+
+    Django's [DetailView](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#detailview) works like ListView but returns a single instance of its model instead of a queryset of all instances.
+
+    Like ListView, DetailView also makes some implicit assumptions about how to make this view work for you.
+
+    For template rendering, it looks for a template named `{{ model name }}_detail.html` unless you specify something else.
+
+    DetailView also relies on a URL parameter to tell it which `Cheese` instance to retrieve. By default, Django looks for a `pk` or `slug` parameter - for our view the URL looks like this:
+
+  pre
+    | url(r'^/(?P<pk>[0-9]+)$', CheeseDetailView.as_view(), name='view_cheese'),
+
+  :markdown
+    You can also specify the name of the URL parameter DetailView should use, but you might miss that reading [its documentation](https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#detailview).
+
+    To find out which DetailView property you need for a custom URL parameter, you would need to look at the documentation for one of DetailView's ancestors, [SingleObjectMixin](https://docs.djangoproject.com/en/1.8/ref/class-based-views/mixins-single-object/#django.views.generic.detail.SingleObjectMixin). The DetailView class actually has **five** different ancestors it inherits from, though, so try to avoid taking an accidental detour through `SingleObjectTemplateResponseMixin` or `BaseDetailView`.
+
+    Seems frustrating? You're not alone - this is the point where most people check out of class-based views.
+
+    But if you can stomach a few more steps, we'll see class-based views at their best.

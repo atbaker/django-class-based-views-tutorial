@@ -1,0 +1,99 @@
+<!DOCTYPE html><html><head><title>Django class-based views</title><style>body, html {
+  height:100%;
+  width:100%;
+  padding:0;
+  margin:0;
+  overflow:hidden;
+  background-color:#ddd;
+}
+.wrapper {
+  height:100%;
+  width:100%;
+}</style><link rel="shortcut icon" href="//twilio.com/bundles/marketing/img/favicons/favicon.ico"><link rel="apple-touch-icon" href="//twilio.com/bundles/marketing/img/favicons/favicon_57.png"><link rel="apple-touch-icon" sizes="72x72" href="//twilio.com/bundles/marketing/img/favicons/favicon_72.png"><link rel="apple-touch-icon" sizes="114x114" href="//twilio.com/bundles/marketing/img/favicons/favicon_114.png"><link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"><link rel="stylesheet" href="viewsaurus.css"></head><body><div class="wrapper"><div id="viewsaurus" data-title="Django class-based views"><div class="saurus-panes"><div class="saurus-prose"><div class="saurus-prose-header"><div class="title-outer"><span class="step-title">Django class-based views</span></div></div><div class="saurus-nav-buttons"><div class="saurus-nav-button nav-overview"><div class="saurus-nav-button-inner"><i class="fa fa-fw fa-list"></i></div><div class="nav-divider"></div></div><div class="saurus-nav-button nav-previous"><div class="saurus-nav-button-inner"><a href=""> <i class="fa fa-fw fa-play fa-rotate-180"></i></a></div><div class="nav-divider"></div></div><div class="saurus-nav-button nav-next clickable"><div class="saurus-nav-button-inner"><a href="#1"> <i class="fa fa-fw fa-play"></i></a></div></div><div class="saurus-next-title"><span class="next-title-inner"></span></div></div><div class="saurus-progress-bar"></div><div class="saurus-start"><p>Learn about Django's unusual class-based views feature and when to use them - and not use them - in your own projects.</p><a href="#0">Start Tutorial</a></div><div class="saurus-content"><div data-title="Meet the class-based view" class="chapter"><div data-title="Introduction" data-file="inventory/views.py" class="step"><h2 id="django-class-based-views-threat-or-menace-">Django class-based views: threat or menace?</h2>
+<p><em>Author&#39;s note: I maybe played around too much with some of these step titles. I would probably not be so cheeky for something on Twilio.com... probably.</em></p>
+<p>In March 2011, as part of a relatively standard minor release, the Django project officially incorporated its most controversial feature ever: <a href="https://docs.djangoproject.com/en/1.8/releases/1.3/#class-based-views">class-based views</a>.</p>
+<p>Devised as a tool to help developers avoid writing boilerplate <a href="https://en.wikipedia.org/wiki/Create,_read,_update_and_delete">Create, Read, Update, and Delete</a> view logic, class-based views came under fire as a violation of Python&#39;s second most important tenet:</p>
+<pre>import this
+ 
+...
+Explicit is better than implicit.</pre><p>While class-based views can greatly reduce the lines of code a developer needs to implement some basic web application features, critics of class-based views say that the cognitive overhead and &quot;magic&quot; of CBVs negate any benefits they provide.</p>
+<p>To see this firsthand, let do a quick comparison of a function-based view and a class-based view.</p>
+</div><div data-title="A function-based view" data-file="inventory/views.py" data-highlight="10-17" class="step"><h2 id="a-familiar-function-based-view">A familiar function-based view</h2>
+<p>Django, like most web frameworks, expects the views you write as a developer to fulfill to a simple contract: they should accept a request and return a response.</p>
+<p>What you do in between is up to you. Your views can be as simple or <a href="http://stackoverflow.com/questions/12022105/pythonic-way-to-simplify-this-long-django-view">or complex</a> as you like.</p>
+<p>To help us investigate class-based views, we&#39;ll look at a sample web application that helps workers track inventory at an artisanal cheese shop called &quot;CURD&quot;.</p>
+<p>This function-based view just renders our inventory system&#39;s home page template. It took us a few lines to write, but it&#39;s still a small view.</p>
+<p>Now let&#39;s see what it takes to do this work with a class-based view instead.</p>
+</div><div data-title="Rendering a template in one line" data-file="curd/urls.py" data-highlight="1-6" class="step"><h2 id="rendering-a-template-in-one-line">Rendering a template in one line</h2>
+<p>Class-based views actually make straight template rendering pretty easy.</p>
+<p>We can do it in one line in our URL configuration using Django&#39;s <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/base/#django.views.generic.base.TemplateView">TemplateView</a>.</p>
+<p>Django invokes views as callables, so to use this view or any class-based view we need to give it to our URL using <code>.as_view()</code> method of the class.</p>
+<p>Which is a little strange, but it saved us from writing a few lines of view code, which are precious lines we don&#39;t need to test.</p>
+<p>Let&#39;s keep exploring class-based views and consider some more complex examples.</p>
+</div><div data-title="Read all about it" data-file="inventory/views.py" data-highlight="19-22" class="step"><h2 id="read-all-about-it">Read all about it</h2>
+<p>Any cheese shop worth its salt knows what cheese it stocks and how much it has of each. We wrote a small model to help our users track each cheese in the inventory:</p>
+<pre>class Cheese(models.Model):
+    """A type of cheese in the Curd Shop inventory"""
+ 
+    name = models.CharField(max_length=50)
+    price = models.DecimalField(max_digits=5, decimal_places=2)
+    quantity = models.IntegerField(default=0)</pre><p>To show our users a list of all cheeses in the database, you can imagine what our function-based view would look like:</p>
+<ol>
+<li>Query the ORM for <code>Cheese.objects.all()</code></li>
+<li>Set the result of that query as a variable in our context</li>
+<li>Render a list template with that context</li>
+</ol>
+<p>That would take a few lines of code, but Django&#39;s <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#listview">ListView</a> can save us some time. We get all the functionality listed above just for setting a single property on the view.</p>
+<p>You might be wondering how ListView knows which template to render? This is the first of many dynamic default class-based view properties we&#39;ll encounter.</p>
+<p>By default, ListView looks for a template named <code>{{ model name }}_list.html</code> - in our case that&#39;s <code>cheese_list.html</code>. If that bugs you though, you can always add a <code>template_name</code> property to your <code>ListView</code> implementation.</p>
+</div><div data-title="Don't sweat the details" data-file="inventory/views.py" data-highlight="24-27" class="step"><h2 id="don-t-sweat-the-details">Don&#39;t sweat the details</h2>
+<p>Django&#39;s <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#detailview">DetailView</a> works like ListView but returns a single instance of its model instead of a queryset of all instances.</p>
+<p>Like ListView, DetailView also makes some implicit assumptions about how to make this view work for you.</p>
+<p>For template rendering, it looks for a template named <code>{{ model name }}_detail.html</code> unless you specify something else.</p>
+<p>DetailView also relies on a URL parameter to tell it which <code>Cheese</code> instance to retrieve. By default, Django looks for a <code>pk</code> or <code>slug</code> parameter - for our view the URL looks like this:</p>
+<pre>url(r'^/(?P<pk>[0-9]+)$', CheeseDetailView.as_view(), name='view_cheese'),</pre><p>You can also specify the name of the URL parameter DetailView should use, but you might miss that reading <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-display/#detailview">its documentation</a>.</p>
+<p>To find out which DetailView property you need for a custom URL parameter, you would need to look at the documentation for one of DetailView&#39;s ancestors, <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/mixins-single-object/#django.views.generic.detail.SingleObjectMixin">SingleObjectMixin</a>. The DetailView class actually has <strong>five</strong> different ancestors it inherits from, though, so try to avoid taking an accidental detour through <code>SingleObjectTemplateResponseMixin</code> or <code>BaseDetailView</code>.</p>
+<p>Seems frustrating? You&#39;re not alone - this is the point where most people check out of class-based views.</p>
+<p>But if you can stomach a few more steps, we&#39;ll see class-based views at their best.</p>
+</div></div><div data-title="Create, Update, and Delete" class="chapter"><div data-title="Every act of creation is first an act of destruction" data-file="inventory/views.py" data-highlight="29-34" class="step"><blockquote> </blockquote>Every act of creation is first an act of destruction.<p style="text-align: right">- Pablo Picasso</p><p>When we looked at ListView and DetailView, we got a taste for the drawbacks of using class-based views. They seemed like a lot of &quot;magic&quot; just to save a few lines of view code.</p>
+<p><a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#createview">CreateView</a> has even more magic, but it also saves you a lot of form processing boilerplate code that developers hate to write.</p>
+<p>By specifying only the <code>model</code> and <code>fields</code> property of our <code>CheeseCreateView</code>, Django does a lot work for us. This view will:</p>
+<ol>
+<li>Render a blank form on a GET request using the <code>cheese_form.html</code> template</li>
+<li>Create a <a href="https://docs.djangoproject.com/en/1.8/topics/forms/modelforms/#modelform">ModelForm</a> for our <code>Cheese</code> model to sanitize POST data</li>
+<li>Return any errors on the form to the user</li>
+<li>Save the new <code>Cheese</code> instance and redirect the user to the <code>Cheese</code> model&#39;s <code>get_absolute_url</code> method when it receives valid input</li>
+</ol>
+<p>That&#39;s a lot of bang for our buck from just two properties - especially when you consider the tests we would have needed to cover a function-based view that does the same work.</p>
+</div><div data-title="Update! Update! This just in: mixins" data-file="inventory/views.py" data-highlight="29-42" class="step"><h2 id="update-update-this-just-in-mixins">Update! Update! This just in: mixins</h2>
+<p>Our <code>CheeseUpdateView</code> looks almost exactly like our <code>CheeseCreateView</code>, but it inherits from <a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#updateview">UpdateView</a>.</p>
+<p>A sort-of hybrid of DetailView and CreateView, UpdateView does all the work we mentioned in the previous step but will prepopulate its form data with values from an existing <code>Cheese</code> instance.</p>
+<p><strong>Mixins</strong></p>
+<p>We  gave both views a little extra kick by having them inherit from the <a href="https://docs.djangoproject.com/en/1.8/ref/contrib/messages/">SuccessMessageMixin</a> class. </p>
+<p>This handy class will use the value of our view class&#39;s <code>success_message</code> property with Django&#39;s messaging framework, giving us a nice way confirm with users that the creation was successful.</p>
+<p>Mixins make class-based views better by helping them do a little extra work. Though writing your own involves diving deeper into the class-based views API, the <a href="http://django-braces.readthedocs.org/en/latest/index.html">django-braces</a> library offers some handy mixins that may do what you need already.</p>
+<p>Here are just a few:</p>
+<ul>
+<li><a href="http://django-braces.readthedocs.org/en/latest/access.html#loginrequiredmixin">LoginRequiredMixin</a></li>
+<li><a href="http://django-braces.readthedocs.org/en/latest/access.html#superuserrequiredmixin">SuperuserRequiredMixin</a></li>
+<li><a href="http://django-braces.readthedocs.org/en/latest/access.html#sslrequiredmixin">SSLRequiredMixin</a></li>
+</ul>
+<p>We&#39;ll wrap up by looking at the most unique of Django&#39;s class-based views, DeleteView.</p>
+</div><div data-title="Del33t" data-file="inventory/views.py" data-highlight="45-49" class="step"><h2 id="del33t">Del33t</h2>
+<p><a href="https://docs.djangoproject.com/en/1.8/ref/class-based-views/generic-editing/#deleteview">DeleteView</a> mostly does what you would expect - it takes a primary key for an object and removes it from the database.</p>
+<p>What you might not expect is that DeleteView also adds a confirmation step into the workflow. </p>
+<p>When a user GETs a DeleteView, you can provide a template with a form asking the user to confirm their decision. DeleteView only removes the identified object from the database when it receives a POST request.</p>
+<p>One of DeleteView&#39;s quirks is its <code>success_url</code> property.</p>
+<p>The other class-based views reference a model instance&#39;s <code>get_absolute_url</code> method to determine which URL to redirect users to after a successful operation. A successful DeleteView operation removes the object in question, so we need to manually specify a different URL to route users to.</p>
+<p>Because our class-based view properties are evaluated when our <code>views.py</code> module is first loaded, Django will throw an error if we used the regular <code>reverse</code> shortcut because Django hasn&#39;t parsed our project&#39;s URL configuration yet.</p>
+<p>The <a href="https://docs.djangoproject.com/en/1.8/ref/urlresolvers/#reverse-lazy">reverse_lazy</a> utility is our ticket out of that problem.</p>
+</div><div data-title="You be the judge" data-file="inventory/views.py" class="step"><h2 id="you-be-the-judge">You be the judge</h2>
+<p>One year ago Adrian Holovaty, one of Django&#39;s co-creators, <a href="http://www.reddit.com/r/django/comments/1kc3go/cbv_lifecycle_documentation/cbnkwig">explicity discouraged using class-based views in a Reddit thread</a>:</p>
+<blockquote>I'd suggest not using class-based views. They're way over-abstracted and not worth the cognitive burden.</blockquote><p>On the other hand <a href="http://twoscoopspress.org/">Two Scoops of Django</a>, which is generally recognized as the single best tome of Django best practices, strongly advocates for class-based views:</p>
+<blockquote>We prefer to use CBVs for most views, using FBVs to implement only the custom error views or complicated ones that would be a pain to implement with CBVs.</blockquote><p>In this tutorial we&#39;ve examined some of the advantages and disadvantages of class-based views. Like most programming disagreements, the truth in this case is probably &quot;use the right tool for the job.&quot;</p>
+<p>And even if you never try using class-based views yourself, you&#39;re now well equipped to start an argument at your next Django meetup!</p>
+</div></div>
+<div class="saurus-files" style="display:none;"><textarea class="saurus-file" data-file="inventory/views.py" data-mode="python">ZnJvbSBkamFuZ28uY29udHJpYi5tZXNzYWdlcy52aWV3cyBpbXBvcnQgU3VjY2Vzc01lc3NhZ2VNaXhpbgpmcm9tIGRqYW5nby5jb3JlLnVybHJlc29sdmVycyBpbXBvcnQgcmV2ZXJzZV9sYXp5CmZyb20gZGphbmdvLnNob3J0Y3V0cyBpbXBvcnQgcmVuZGVyX3RvX3Jlc3BvbnNlCmZyb20gZGphbmdvLnZpZXdzLmdlbmVyaWMgaW1wb3J0IERldGFpbFZpZXcKZnJvbSBkamFuZ28udmlld3MuZ2VuZXJpYy5lZGl0IGltcG9ydCBDcmVhdGVWaWV3LCBVcGRhdGVWaWV3LCBEZWxldGVWaWV3CmZyb20gZGphbmdvLnZpZXdzLmdlbmVyaWMubGlzdCBpbXBvcnQgTGlzdFZpZXcKCmZyb20gLm1vZGVscyBpbXBvcnQgQ2hlZXNlCgpkZWYgaG9tZShyZXF1ZXN0KToKICAgICIiIkEgc2FtcGxlIGZ1bmN0aW9uLWJhc2VkIHZpZXciIiIKICAgIGNvbnRleHQgPSB7fQoKICAgICMgRG8gc29tZSB2aWV3IGxvZ2ljIC0gZm9yIGV4YW1wbGU6CiAgICBjb250ZXh0Wydmb28nXSA9ICdiYXInCgogICAgcmV0dXJuIHJlbmRlcl90b19yZXNwb25zZSgnaW5kZXguaHRtbCcsIGNvbnRleHQpCgpjbGFzcyBDaGVlc2VMaXN0VmlldyhMaXN0Vmlldyk6CiAgICAiIiJTaG93cyB1c2VycyBhIGxpc3Qgb2YgY2hlZXNlcyIiIgoKICAgIG1vZGVsID0gQ2hlZXNlCgpjbGFzcyBDaGVlc2VEZXRhaWxWaWV3KERldGFpbFZpZXcpOgogICAgIiIiU2hvd3MgdXNlcnMgYSBzaW5nbGUgY2hlZXNlIiIiCgogICAgbW9kZWwgPSBDaGVlc2UKCmNsYXNzIENoZWVzZUNyZWF0ZVZpZXcoU3VjY2Vzc01lc3NhZ2VNaXhpbiwgQ3JlYXRlVmlldyk6CiAgICAiIiJQb3dlcnMgYSBmb3JtIHRvIGNyZWF0ZSBhIG5ldyBjaGVlc2UiIiIKCiAgICBtb2RlbCA9IENoZWVzZQogICAgZmllbGRzID0gWyduYW1lJywgJ3ByaWNlJywgJ3F1YW50aXR5J10KICAgIHN1Y2Nlc3NfbWVzc2FnZSA9ICdDaGVlc2Ugc3VjY2Vzc2Z1bGx5IGNyZWF0ZWQuJwoKCmNsYXNzIENoZWVzZVVwZGF0ZVZpZXcoU3VjY2Vzc01lc3NhZ2VNaXhpbiwgVXBkYXRlVmlldyk6CiAgICAiIiJQb3dlcnMgYSBmb3JtIHRvIGVkaXQgZXhpc3RpbmcgY2hlZXNlcyIiIgoKICAgIG1vZGVsID0gQ2hlZXNlCiAgICBmaWVsZHMgPSBbJ25hbWUnLCAncHJpY2UnLCAncXVhbnRpdHknXQogICAgc3VjY2Vzc19tZXNzYWdlID0gJ0NoZWVzZSBzdWNjZXNzZnVsbHkgdXBkYXRlZC4nCgoKY2xhc3MgQ2hlZXNlRGVsZXRlVmlldyhEZWxldGVWaWV3KToKICAgICIiIlByb21wdHMgdXNlcnMgdG8gY29uZmlybSBkZWxldGlvbiBvZiBhbiBjaGVlc2UiIiIKCiAgICBtb2RlbCA9IENoZWVzZQogICAgc3VjY2Vzc191cmwgPSByZXZlcnNlX2xhenkoJ2xpc3RfY2hlZXNlcycpCg==</textarea>
+<textarea class="saurus-file" data-file="curd/urls.py" data-mode="python">ZnJvbSBkamFuZ28uY29uZi51cmxzIGltcG9ydCBpbmNsdWRlLCB1cmwKZnJvbSBkamFuZ28uY29udHJpYiBpbXBvcnQgYWRtaW4KZnJvbSBkamFuZ28udmlld3MuZ2VuZXJpYyBpbXBvcnQgVGVtcGxhdGVWaWV3Cgp1cmxwYXR0ZXJucyA9IFsKICAgIHVybChyJ14kJywgVGVtcGxhdGVWaWV3LmFzX3ZpZXcodGVtcGxhdGVfbmFtZT0naW5kZXguaHRtbCcpLCBuYW1lPSdob21lJyksCiAgICAjIHVybChyJ14kJywgJ2ludmVudG9yeS52aWV3cy5ob21lJyksCiAgICB1cmwocideaW52ZW50b3J5JywgaW5jbHVkZSgnaW52ZW50b3J5LnVybHMnKSksICAgIAoKICAgICMgSW5jbHVkZSB0aGUgRGphbmdvIGFkbWluCiAgICB1cmwocideYWRtaW4vJywgaW5jbHVkZShhZG1pbi5zaXRlLnVybHMpKSwKXQo=</textarea>
+</div>
+</div><div class="saurus-overview"><ul></ul></div></div><div class="saurus-code"><div class="file-path"><span class="crumb-container"></span><i class="fa fa-fw fa-folder"></i></div><div class="saurus-editor"></div></div><div class="saurus-explorer"><div class="saurus-file-list"></div></div></div></div></div><script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script><script src="//cdnjs.cloudflare.com/ajax/libs/backbone.js/1.1.2/backbone-min.js"></script><script src="ace/ace.js"></script><script src="ace/theme-monokai.js"></script><script src="viewsaurus.js"></script></body></html>
